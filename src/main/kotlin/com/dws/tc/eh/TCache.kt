@@ -6,7 +6,9 @@ interface TCache<T> {
 
     fun get(tenant:String,entity:String,id:String,isQuery:Boolean):T?
 
-    fun put(tenant:String,entity:String,id:String,value:T,isQuery:Boolean)
+    fun put(tenant:String,entity:String,id:String,value:T)
+
+    fun put(tenant:String,entity:String,id:String,value:T,entityIds:List<String>)
 
     fun flushAll(tenant:String)
 

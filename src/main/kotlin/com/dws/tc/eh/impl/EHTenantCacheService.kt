@@ -1,8 +1,7 @@
 package com.dws.tc.eh.impl
 
 import com.dws.tc.eh.TCache
-import com.dws.tc.eh.dto.CacheObject
-import org.ehcache.Cache
+import com.dws.tc.dto.CacheObject
 
 
 class EHTenantCacheService: TCache<Any> {
@@ -63,11 +62,15 @@ class EHTenantCacheService: TCache<Any> {
         }
     }
 
-    override fun put(tenant: String, entity: String, id: String, value: Any, isQuery: Boolean) {
+    override fun put(tenant: String, entity: String, id: String, value: Any, isQuery: Boolean,entityIds:List<String>) {
         when(isQuery)
         {
-            false->
-            true->
+            false->{
+
+            }
+            true->{
+
+            }
         }
     }
 
