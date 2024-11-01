@@ -1,6 +1,5 @@
 package com.dws.tc.eh
 
-import com.dws.tc.eh.dto.TenantCache
 import org.ehcache.Cache
 
 interface Cache<T> {
