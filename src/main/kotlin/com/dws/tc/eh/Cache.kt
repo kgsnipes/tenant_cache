@@ -1,11 +1,14 @@
 package com.dws.tc.eh
 
+import com.dws.tc.eh.dto.TenantCache
+import org.ehcache.Cache
+
 interface Cache<T> {
-    fun get(key:String):T?
-    fun put(key:String, value:T?)
-    fun put(key:String, value:T?,milli:Long)
-    fun clear()
-    fun remove(key:String)
-    fun hasKey(key:String):Boolean
-    fun size():Int
+    fun createCache(bucket:String,config:Map<String,String>)
+    fun getCache(bucket:String):Cache<String,T>?
+    fun get(bucket:String,key:String):T?
+    fun put(bucket:String,key:String, value:T)
+    fun flushAll(bucket:String)
+    fun remove(bucket:String,key:String)
+    fun hasKey(bucket:String,key:String):Boolean
 }

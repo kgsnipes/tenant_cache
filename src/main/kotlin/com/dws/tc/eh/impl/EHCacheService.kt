@@ -13,43 +13,46 @@ import java.time.temporal.ChronoUnit
 
 class EHCacheService: Cache<Any> {
 
-    private var _cache:org.ehcache.Cache<String,Any>?=null
+    companion object
+    {
+        private val cacheMap= mutableMapOf<String,org.ehcache.Cache<String,Any>>()
+        private val manager: CacheManager = CacheManagerBuilder.newCacheManagerBuilder().build()
+    }
 
     init {
-        val manager: CacheManager = CacheManagerBuilder.newCacheManagerBuilder().build()
         manager.init()
-        _cache=manager.createCache("buckets",
+    }
+
+    override fun createCache(bucket: String, config: Map<String, String>) {
+        val cache=manager.createCache(bucket,
             CacheConfigurationBuilder.newCacheConfigurationBuilder(
                 String::class.java,Any::class.java,
-                ResourcePoolsBuilder.newResourcePoolsBuilder().heap(10000, EntryUnit.ENTRIES)).withExpiry(ExpiryPolicyBuilder.timeToLiveExpiration(
-                Duration.of(24,ChronoUnit.HOURS))).build())
-
-    }
-    override fun get(key: String): Any? {
-        return _cache!!.get(key)
+                ResourcePoolsBuilder.newResourcePoolsBuilder().heap(config["maxItems"]!!.toLong(), EntryUnit.ENTRIES)).withExpiry(ExpiryPolicyBuilder.timeToLiveExpiration(
+                Duration.of(config["ttlHours"]!!.toLong(),ChronoUnit.HOURS))).build())
+        cacheMap[bucket] = cache
     }
 
-    override fun clear() {
-       _cache!!.clear()
+    override fun getCache(bucket: String): org.ehcache.Cache<String, Any>? {
+        return cacheMap[bucket]
     }
 
-    override fun remove(key: String) {
-        _cache!!.remove(key)
+    override fun get(bucket:String,key: String): Any? {
+        return getCache(bucket)!!.get(key)
     }
 
-    override fun hasKey(key: String): Boolean {
-        return _cache!!.containsKey(key)
+    override fun flushAll(bucket:String,) {
+        getCache(bucket)!!.clear()
     }
 
-    override fun size(): Int {
-        throw RuntimeException("Not Supported")
+    override fun remove(bucket:String,key: String) {
+        getCache(bucket)!!.remove(key)
     }
 
-    override fun put(key: String, value: Any?, milli: Long) {
-        _cache!!.put(key, value)
+    override fun hasKey(bucket:String,key: String): Boolean {
+        return getCache(bucket)!!.containsKey(key)
     }
 
-    override fun put(key: String, value: Any?) {
-        put(key, value,0)
+    override fun put(bucket:String,key: String, value: Any) {
+        getCache(bucket)!!.put(key, value)
     }
 }
