@@ -182,8 +182,29 @@ class EHTenantCacheService: TCache<Any> {
     override fun get(tenant: String, entity: String, id: String, isQuery: Boolean): Any? {
         return when(isQuery)
         {
-            false->(cacheService.get(tenant,"${entity}_${id}") as CacheObject).obj
-            true->(cacheService.get(tenant,"${tenant}_query_${id}")as CacheQueryObject).obj
+            false->{
+                val cacheObject=cacheService.get(tenant,"${entity}_${id}")
+                if(cacheObject!=null)
+                {
+                    (cacheObject as CacheObject).obj
+                }
+                else
+                {
+                    null
+                }
+            }
+            true->{
+                val cacheObject=cacheService.get(tenant,"${tenant}_query_${id}")
+                if(cacheObject!=null)
+                {
+                    (cacheObject as CacheObject).obj
+                }
+                else
+                {
+                    null
+                }
+
+            }
         }
     }
 
@@ -237,13 +258,13 @@ class EHTenantCacheService: TCache<Any> {
         return isAnnotationAvailable(value::class,CacheEntity::class) && isAnnotationAvailableOnMembers(value::class,CacheId::class)
     }
 
-    private fun isAnnotationAvailableOnMembers(kClass: KClass<out Any>, kClass1: KClass<CacheId>): Boolean {
-        return kClass.members.any { m->m.annotations.any { e->e.annotationClass==kClass1} }
+    private fun isAnnotationAvailableOnMembers(kClass: KClass<*>, kClass1: KClass<*>): Boolean {
+        return kClass.members.any { m->m.annotations.any { e->e::class==kClass1} }
     }
 
     private fun isAnnotationAvailable(cls: KClass<*>,annotation:KClass<*>):Boolean
     {
-        return cls.annotations.any { e -> e.annotationClass==annotation::class }
+        return cls.annotations.any { e -> e.annotationClass==annotation }
     }
 
     private fun getEntityName(cls: KClass<*>):String?
