@@ -5,7 +5,6 @@ import com.dws.tc.annotation.CacheId
 import com.dws.tc.eh.TCache
 import com.dws.tc.dto.CacheObject
 import com.dws.tc.dto.CacheQueryObject
-import org.ehcache.impl.internal.concurrent.ConcurrentHashMap
 import org.slf4j.LoggerFactory
 import java.lang.Thread.sleep
 import java.util.concurrent.ConcurrentSkipListSet
@@ -77,12 +76,12 @@ class EHTenantCacheService: TCache<Any> {
         {
             //iterate over each element
             entitiesForQueryUpdate.forEach { t->
-
+                updateQueryResultWithUpdatedEntity(t)
             }
         }
     }
 
-    private fun updateQueryResultWithUpdatedEntity()
+    private fun updateQueryResultWithUpdatedEntity(t:Triple<String,String,String>)
     {
         //fetch the actual entity
         val wrappedEntity=cacheService.get(t.first,"${t.second}_${t.third}")
@@ -143,7 +142,6 @@ class EHTenantCacheService: TCache<Any> {
                 _put(e.first,e.second,false,false)
             }
         }
-
     }
 
     private fun performRemovalOfEntitiesFromQueries()
@@ -170,7 +168,6 @@ class EHTenantCacheService: TCache<Any> {
                         cacheService.remove(tenant,k)
                 }
             }
-
         }
     }
 
@@ -205,20 +202,18 @@ class EHTenantCacheService: TCache<Any> {
             {
                 val cacheKey="${entityName}_${id}"
                 cacheService.put(tenant,cacheKey,CacheObject(id,value))
-            }
-
-            if(performAsyncUpdates)
-            {
-                if(updateAsync && entityName!=null && id!=null) {
-                    entitiesForQueryUpdate.add(Triple(tenant,entityName, id))
-                }
-                else
+                if(performAsyncUpdates)
                 {
-                    TODO()
+                    if(updateAsync) {
+                        entitiesForQueryUpdate.add(Triple(tenant,entityName, id))
+                    }
+                    else
+                    {
+                        updateQueryResultWithUpdatedEntity(Triple(tenant,entityName, id))
+                    }
                 }
+
             }
-
-
         }
     }
 
