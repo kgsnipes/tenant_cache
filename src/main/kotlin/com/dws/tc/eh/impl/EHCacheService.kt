@@ -32,6 +32,10 @@ class EHCacheService: Cache<Any> {
         cacheMap[bucket] = cache
     }
 
+    override fun removeCache(bucket: String) {
+        cacheMap.remove(bucket)
+    }
+
     override fun getCache(bucket: String): org.ehcache.Cache<String, Any>? {
         return cacheMap[bucket]
     }

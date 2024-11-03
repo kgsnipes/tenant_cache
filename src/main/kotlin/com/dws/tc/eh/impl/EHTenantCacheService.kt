@@ -13,7 +13,10 @@ class EHTenantCacheService: TCache<Any> {
 
     override fun createTenantCache(name: String, config: Map<String, String>) {
         cacheService.createCache(name,config)
+    }
 
+    override fun removeTenantCache(name: String) {
+        cacheService.removeCache(name)
     }
 
     override fun get(tenant: String, entity: String, id: String, isQuery: Boolean): Any? {
@@ -24,12 +27,40 @@ class EHTenantCacheService: TCache<Any> {
         }
     }
 
+    override fun put(tenant: String, value: Any) {
+        if(cacheAnnotationsAvailable(value))
+        {
+            val entityName=getEntityName(value)
+            val id=getIdForObject(value)
+            if(entityName!=null && id!=null)
+            {
+                val cacheKey="${entityName}_${id}"
+                cacheService.put(tenant,cacheKey,value)
+            }
+        }
+    }
+
+    private fun getIdForObject(value: Any): Any? {
+        TODO()
+    }
+
+    private fun getEntityName(value: Any): Any? {
+        TODO("Not yet implemented")
+    }
+
+    private fun cacheAnnotationsAvailable(value: Any): Boolean {
+        TODO()
+    }
+
+    override fun put(tenant: String, entity: String, id: String, value: Any) {
+        cacheService.put(tenant,"${entity}_${id}",value)
+    }
+
     override fun flushAll(tenant: String) {
         cacheService.flushAll(tenant)
     }
 
     override fun remove(tenant: String, entity: String, id: String, isQuery: Boolean) {
-
         when(isQuery)
         {
             false-> {
@@ -44,11 +75,13 @@ class EHTenantCacheService: TCache<Any> {
                         }
 
                     }
+                    // remove the entity from the cache
                     cacheService.remove(tenant,"${entity}_${id}")
                 }
 
             }
             true-> {
+                //remove the query where the entity was cached
                 cacheService.remove(tenant,"${entity}_query_${id}")
             }
         }
@@ -62,16 +95,8 @@ class EHTenantCacheService: TCache<Any> {
         }
     }
 
-    override fun put(tenant: String, entity: String, id: String, value: Any, isQuery: Boolean,entityIds:List<String>) {
-        when(isQuery)
-        {
-            false->{
+    override fun put(tenant: String, entity: String, id: String, value: Any,entityIds:List<String>) {
 
-            }
-            true->{
-
-            }
-        }
     }
 
 
