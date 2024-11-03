@@ -98,7 +98,7 @@ class EHTenantCacheService: TCache<Any> {
         }
     }
 
-    override fun put(tenant: String, value: Any) {
+    override fun put(tenant: String, value: Any,updateAsync:Boolean) {
         if(cacheAnnotationsAvailable(value))
         {
             val entityName=getEntityName(value)
@@ -107,7 +107,13 @@ class EHTenantCacheService: TCache<Any> {
             {
                 val cacheKey="${entityName}_${id}"
                 cacheService.put(tenant,cacheKey,value)
-                entitiesForForUpdate.put(tenant, Pair(entityName,id))
+                if(updateAsync) {
+                    entitiesForForUpdate.put(tenant, Pair(entityName, id))
+                }
+                else
+                {
+                    TODO()
+                }
             }
             initiateMaintenanceThread()
         }
@@ -154,9 +160,15 @@ class EHTenantCacheService: TCache<Any> {
         }
     }
 
-    override fun put(tenant: String, entity: String, id: String, value: Any) {
+    override fun put(tenant: String, entity: String, id: String, value: Any,updateAsync:Boolean) {
         cacheService.put(tenant,"${entity}_${id}",value)
-        entitiesForForUpdate.put(tenant,Pair(entity,id))
+        if(updateAsync) {
+            entitiesForForUpdate.put(tenant, Pair(entity, id))
+        }
+        else
+        {
+            TODO()
+        }
         initiateMaintenanceThread()
     }
 
@@ -164,7 +176,7 @@ class EHTenantCacheService: TCache<Any> {
         cacheService.flushAll(tenant)
     }
 
-    override fun remove(tenant: String, entity: String, id: String, isQuery: Boolean) {
+    override fun remove(tenant: String, entity: String, id: String, isQuery: Boolean,updateAsync:Boolean) {
         when(isQuery)
         {
             false-> {
@@ -180,7 +192,13 @@ class EHTenantCacheService: TCache<Any> {
 //
 //                    }
                 //}
-                removeEntitiesFromQueries.put(tenant, Pair(entity,id))
+                if(updateAsync) {
+                    removeEntitiesFromQueries.put(tenant, Pair(entity, id))
+                }
+                else
+                {
+                    TODO()
+                }
                 // remove the entity from the cache
                 cacheService.remove(tenant,"${entity}_${id}")
 
@@ -201,13 +219,19 @@ class EHTenantCacheService: TCache<Any> {
         }
     }
 
-    override fun putQueryResult(tenant: String,queryId:String,value: Any,listAttribute:String) {
+    override fun putQueryResult(tenant: String,queryId:String,value: Any,listAttribute:String,updateAsync:Boolean) {
         cacheService.put(tenant,"${tenant}_query_${queryId}",value)
         val lAttribute=value::class.members.firstOrNull { e->e.name==listAttribute }
         if(lAttribute!=null && lAttribute is Iterable<*>)
         {
             lAttribute .filterNotNull().forEach { v->
-                addEntitiesfromQueries.put(tenant,v)
+                if(updateAsync) {
+                    addEntitiesfromQueries.put(tenant, v)
+                }
+                else
+                {
+                    TODO()
+                }
             }
         }
         initiateMaintenanceThread()
