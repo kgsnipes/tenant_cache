@@ -10,7 +10,7 @@ interface TCache<T> {
     fun put(tenant:String,value:T)
     fun put(tenant:String,entity:String,id:String,value:T)
 
-    fun put(tenant:String,entity:String,id:String,value:T,entityIds:List<String>)
+    fun putQueryResult(tenant:String,queryId:String,value: Any,listAttribute:String)
 
     fun flushAll(tenant:String)
 
