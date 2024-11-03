@@ -12,6 +12,7 @@ import java.util.concurrent.ConcurrentSkipListSet
 import kotlin.concurrent.thread
 import kotlin.random.Random
 import kotlin.reflect.KClass
+import kotlin.reflect.KMutableProperty
 import kotlin.reflect.KProperty
 
 
@@ -51,11 +52,11 @@ class EHTenantCacheService: TCache<Any> {
             while (true)
             {
                 try {
-
+                    //updating queries with updated entities
                     performUpdateToEntitiesInQueries()
-
+                    //adding entities to cache from query result
                     performCacheEntriesFromQueryResult()
-
+                    //removing query results when entities are being removed from persistence.
                     performRemovalOfEntitiesFromQueries()
 
                     log.info("Background thread taking a nap!!")
@@ -71,27 +72,67 @@ class EHTenantCacheService: TCache<Any> {
 
     private fun performUpdateToEntitiesInQueries()
     {
+        //check if the list is not empty
         if(entitiesForQueryUpdate.isNotEmpty())
         {
+            //iterate over each element
             entitiesForQueryUpdate.forEach { t->
-
-                val list= cacheService.get(t.first,"${t.second}_${t.third}_queries")
-                if(list!=null && list is Iterable<*>)
-                {
-                    list.filterNotNull().forEach { k->
-                        updateEntityInQueryResult(t.first,t.second,t.third,k)
-                    }
-                }
-
 
             }
         }
-
     }
 
-    private fun updateEntityInQueryResult(tenant: String, entity: String, id: String, queryKey: Any) {
+    private fun updateQueryResultWithUpdatedEntity()
+    {
+        //fetch the actual entity
+        val wrappedEntity=cacheService.get(t.first,"${t.second}_${t.third}")
+        //fetch the list of queries it is associated to
+        val queryList= cacheService.get(t.first,"${t.second}_${t.third}_queries")
+        //if the entity and list of queries is not null
+        if(wrappedEntity!=null && queryList!=null && queryList is Iterable<*>)
+        {
+            //filter and iterate over all non null query key
+            queryList.filterNotNull().forEach{qk->
+                //fetch the query result object
+                val cacheQueryObject= cacheService.get(t.first,qk as String) as CacheQueryObject
+                //get the name of the listing attribute for the results
+                val listAttrName=cacheQueryObject.queryListAttr
+                //get list attribute
+                val listAttr=cacheQueryObject.obj::class.members.firstOrNull { e->e.name==listAttrName }
+                //check if the list attribute is mutable
+                if(listAttr!=null && listAttr is KMutableProperty<*>)
+                {
+                    //setup a modified list of results
+                    val modifiedList= mutableListOf<Any>()
+                    (listAttr as List<*>).forEach { e->
+                        if(e!=null)
+                        {
+                            // get the id of the object
+                            val id=getIdForObject(e)
+                            //if the id matches that of the entity cached then add the new entity in the new result list
+                            if(id!=null && id==(wrappedEntity as CacheObject).id)
+                            {
+                                modifiedList.add(wrappedEntity.obj)
+                            }
+                            else
+                            {
+                                //else add the object already available
+                                modifiedList.add(e)
+                            }
+                        }
 
+                    }
+                    //updated the new list in the query result
+                    (listAttr as KMutableProperty<*>).setter.call(cacheQueryObject.obj,modifiedList)
+                }
+                else
+                {
+                    // if list attribute is not mutable then clear the query key from the cache
+                    cacheService.remove(t.first,qk)
+                }
 
+            }
+        }
     }
 
     private fun performCacheEntriesFromQueryResult()
@@ -169,7 +210,7 @@ class EHTenantCacheService: TCache<Any> {
             if(performAsyncUpdates)
             {
                 if(updateAsync && entityName!=null && id!=null) {
-                entitiesForQueryUpdate.add(Triple(tenant,entityName, id))
+                    entitiesForQueryUpdate.add(Triple(tenant,entityName, id))
                 }
                 else
                 {
