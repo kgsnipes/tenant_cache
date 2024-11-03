@@ -7,14 +7,14 @@ interface TCache<T> {
 
     fun get(tenant:String,entity:String,id:String,isQuery:Boolean):T?
 
-    fun put(tenant:String,value:T)
-    fun put(tenant:String,entity:String,id:String,value:T)
+    fun put(tenant:String,value:T,updateAsync:Boolean)
+    fun put(tenant:String,entity:String,id:String,value:T,updateAsync:Boolean)
 
-    fun putQueryResult(tenant:String,queryId:String,value: Any,listAttribute:String)
+    fun putQueryResult(tenant:String,queryId:String,value: Any,listAttribute:String,updateAsync:Boolean)
 
     fun flushAll(tenant:String)
 
-    fun remove(tenant:String,entity:String,id:String,isQuery:Boolean)
+    fun remove(tenant:String,entity:String,id:String,isQuery:Boolean,updateAsync:Boolean)
 
     fun hasKey(tenant:String,entity:String,id:String,isQuery:Boolean):Boolean
 
