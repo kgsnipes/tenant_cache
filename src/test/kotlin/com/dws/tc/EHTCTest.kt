@@ -15,20 +15,20 @@ class EHTCTest {
         val tenant="tenant01"
         val tc=getEHTC()
         tc.createTenantCache(tenant, mapOf(Pair("maxItems","1000"), Pair("ttlHours","24")))
-        tc.put(tenant,EntityData().let {
+        tc.put(tenant,EntityData().also {
             it.id="123456"
             it.name="name 123456"
         },false)
-        tc.put(tenant,EntityData().let {
+        tc.put(tenant,EntityData().also {
             it.id="1234567"
             it.name="name 1234567"
         },false)
-        tc.put(tenant,EntityData().let {
+        tc.put(tenant,EntityData().also {
             it.id="123456"
             it.name="name lastname"
         },false)
 
-        Assertions.assertEquals("name lastname",tc.get(tenant,EntityData::class.simpleName!!,"123456",false))
+        Assertions.assertEquals("name lastname",(tc.get(tenant,EntityData::class.simpleName!!,"123456",false) as EntityData).name)
     }
 
     fun getEHTC():TCache<Any>

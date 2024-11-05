@@ -13,6 +13,7 @@ import kotlin.random.Random
 import kotlin.reflect.KClass
 import kotlin.reflect.KMutableProperty
 import kotlin.reflect.KProperty
+import kotlin.reflect.full.hasAnnotation
 
 
 class EHTenantCacheService: TCache<Any> {
@@ -197,7 +198,7 @@ class EHTenantCacheService: TCache<Any> {
                 val cacheObject=cacheService.get(tenant,"${tenant}_query_${id}")
                 if(cacheObject!=null)
                 {
-                    (cacheObject as CacheObject).obj
+                    (cacheObject as CacheQueryObject).obj
                 }
                 else
                 {
@@ -239,8 +240,8 @@ class EHTenantCacheService: TCache<Any> {
     }
 
     private fun getIdForObject(value: Any): String? {
-        val idAttribute=value::class.members.any { m->m.annotations.any { e->e.annotationClass==CacheId::class} } as KProperty<*>
-        return if(isAnnotationAvailable(value::class,CacheId::class))
+        val idAttribute=value::class.members.firstOrNull { m->m.hasAnnotation<CacheId>()}
+        return if(idAttribute!=null && idAttribute is KProperty<*>)
         {
             idAttribute.getter.call(value).toString()
         }
@@ -255,21 +256,12 @@ class EHTenantCacheService: TCache<Any> {
     }
 
     private fun cacheAnnotationsAvailable(value: Any): Boolean {
-        return isAnnotationAvailable(value::class,CacheEntity::class) && isAnnotationAvailableOnMembers(value::class,CacheId::class)
-    }
-
-    private fun isAnnotationAvailableOnMembers(kClass: KClass<*>, kClass1: KClass<*>): Boolean {
-        return kClass.members.any { m->m.annotations.any { e->e::class==kClass1} }
-    }
-
-    private fun isAnnotationAvailable(cls: KClass<*>,annotation:KClass<*>):Boolean
-    {
-        return cls.annotations.any { e -> e.annotationClass==annotation }
+        return value::class.hasAnnotation<CacheEntity>() && value::class.members.any { e->e.hasAnnotation<CacheId>() }
     }
 
     private fun getEntityName(cls: KClass<*>):String?
     {
-        return if(isAnnotationAvailable(cls,CacheEntity::class))
+        return if(cls.hasAnnotation<CacheEntity>())
         {
             cls.simpleName
         }
