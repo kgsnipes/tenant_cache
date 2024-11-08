@@ -1,6 +1,6 @@
-package com.dws.tc.eh.impl
+package com.dws.tc.impl
 
-import com.dws.tc.eh.Cache
+import com.dws.tc.Cache
 import org.ehcache.CacheManager
 import org.ehcache.config.builders.CacheConfigurationBuilder
 import org.ehcache.config.builders.CacheManagerBuilder
@@ -24,7 +24,7 @@ class EHCacheService: Cache<Any> {
     }
 
     override fun createCache(bucket: String, config: Map<String, String>) {
-        val cache=manager.createCache(bucket,
+        val cache= manager.createCache(bucket,
             CacheConfigurationBuilder.newCacheConfigurationBuilder(
                 String::class.java,Any::class.java,
                 ResourcePoolsBuilder.newResourcePoolsBuilder().heap(config["maxItems"]!!.toLong(), EntryUnit.ENTRIES)).withExpiry(ExpiryPolicyBuilder.timeToLiveExpiration(

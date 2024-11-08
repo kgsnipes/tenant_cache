@@ -2,8 +2,7 @@ package com.dws.tc
 
 import com.dws.tc.annotation.CacheEntity
 import com.dws.tc.annotation.CacheId
-import com.dws.tc.eh.TCache
-import com.dws.tc.eh.impl.EHTenantCacheService
+import com.dws.tc.impl.EHTenantCacheService
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
@@ -75,7 +74,7 @@ class EHTCTest {
         Assertions.assertEquals("name lastname",((tc.get(tenant,PagedResult::class.simpleName!!,"123234",true) as PagedResult).results.last() as EntityData).name)
     }
 
-    fun getEHTC():TCache<Any>
+    fun getEHTC(): TCache<Any>
     {
         return EHTenantCacheService()
     }

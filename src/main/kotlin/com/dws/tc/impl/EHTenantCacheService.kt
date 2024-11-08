@@ -1,8 +1,8 @@
-package com.dws.tc.eh.impl
+package com.dws.tc.impl
 
 import com.dws.tc.annotation.CacheEntity
 import com.dws.tc.annotation.CacheId
-import com.dws.tc.eh.TCache
+import com.dws.tc.TCache
 import com.dws.tc.dto.CacheObject
 import com.dws.tc.dto.CacheQueryObject
 import org.slf4j.LoggerFactory
@@ -20,7 +20,7 @@ class EHTenantCacheService: TCache<Any> {
 
     companion object
     {
-        private val cacheService=EHCacheService()
+        private val cacheService= EHCacheService()
 
         private val addEntitiesfromQueries=ConcurrentSkipListSet<Pair<String,Any>>()
         private val entitiesForQueryUpdate=ConcurrentSkipListSet<Triple<String,String,String>>() //tenant,(entitytype,entityid)
@@ -85,7 +85,7 @@ class EHTenantCacheService: TCache<Any> {
     private fun updateQueryResultWithUpdatedEntity(t:Triple<String,String,String>)
     {
         //fetch the actual entity
-        val wrappedEntity=cacheService.get(t.first,"${t.second}_${t.third}")
+        val wrappedEntity= cacheService.get(t.first,"${t.second}_${t.third}")
         //fetch the list of queries it is associated to
         val queryList= cacheService.get(t.first,"${t.second}_${t.third}_queries")
         //if the entity and list of queries is not null
@@ -184,7 +184,7 @@ class EHTenantCacheService: TCache<Any> {
         return when(isQuery)
         {
             false->{
-                val cacheObject=cacheService.get(tenant,"${entity}_${id}")
+                val cacheObject= cacheService.get(tenant,"${entity}_${id}")
                 if(cacheObject!=null)
                 {
                     (cacheObject as CacheObject).obj
@@ -195,7 +195,7 @@ class EHTenantCacheService: TCache<Any> {
                 }
             }
             true->{
-                val cacheObject=cacheService.get(tenant,"${tenant}_query_${id}")
+                val cacheObject= cacheService.get(tenant,"${tenant}_query_${id}")
                 if(cacheObject!=null)
                 {
                     (cacheObject as CacheQueryObject).obj
@@ -315,8 +315,8 @@ class EHTenantCacheService: TCache<Any> {
     override fun hasKey(tenant: String, entity: String, id: String, isQuery: Boolean): Boolean {
         return when(isQuery)
         {
-            false->cacheService.hasKey(tenant,"${entity}_${id}")
-            true->cacheService.hasKey(tenant,"${tenant}_query_${id}")
+            false-> cacheService.hasKey(tenant,"${entity}_${id}")
+            true-> cacheService.hasKey(tenant,"${tenant}_query_${id}")
         }
     }
 

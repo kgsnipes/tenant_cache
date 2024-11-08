@@ -1,4 +1,4 @@
-package com.dws.tc.eh
+package com.dws.tc
 
 import org.ehcache.Cache
 
