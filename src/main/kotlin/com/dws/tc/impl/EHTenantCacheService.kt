@@ -16,7 +16,7 @@ import kotlin.reflect.KProperty
 import kotlin.reflect.full.hasAnnotation
 
 
-class EHTenantCacheService: TCache<Any> {
+class EHTenantCacheService(private val config:Map<String,String>): AbstractCacheService(), TCache<Any> {
 
     companion object
     {
@@ -34,53 +34,6 @@ class EHTenantCacheService: TCache<Any> {
         initiateMaintenanceThread()
     }
 
-    private fun initiateMaintenanceThread() {
-        if(isThreadDead(maintenanceThread))
-        {
-            log.info("Starting the background thread")
-            maintenanceThread =createMaintenanceThread()
-            maintenanceThread?.start()
-        }
-    }
-
-    private fun isThreadDead(thread: Thread?): Boolean {
-        return thread ==null || !thread.isAlive || thread.isInterrupted
-    }
-
-    private fun createMaintenanceThread(): Thread {
-        return thread(false,true,null,"CacheMaintenanceThread",1,{
-            while (true)
-            {
-                try {
-                    //updating queries with updated entities
-                    performUpdateToEntitiesInQueries()
-                    //adding entities to cache from query result
-                    performCacheEntriesFromQueryResult()
-                    //removing query results when entities are being removed from persistence.
-                    performRemovalOfEntitiesFromQueries()
-
-                    log.info("Background thread taking a nap!!")
-                    sleep(Random(100).nextLong(1000))
-                }catch (e:Exception)
-                {
-                    log.error(e.message,e)
-                }
-            }
-
-        })
-    }
-
-    private fun performUpdateToEntitiesInQueries()
-    {
-        //check if the list is not empty
-        if(entitiesForQueryUpdate.isNotEmpty())
-        {
-            //iterate over each element
-            entitiesForQueryUpdate.forEach { t->
-                updateQueryResultWithUpdatedEntity(t)
-            }
-        }
-    }
 
     private fun updateQueryResultWithUpdatedEntity(t:Triple<String,String,String>)
     {
