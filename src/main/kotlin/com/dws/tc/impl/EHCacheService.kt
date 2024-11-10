@@ -1,6 +1,7 @@
 package com.dws.tc.impl
 
 import com.dws.tc.Cache
+import com.dws.tc.EHCache
 import org.ehcache.CacheManager
 import org.ehcache.config.builders.CacheConfigurationBuilder
 import org.ehcache.config.builders.CacheManagerBuilder
@@ -11,7 +12,7 @@ import java.time.Duration
 import java.time.temporal.ChronoUnit
 
 
-class EHCacheService: Cache<Any> {
+class EHCacheService: EHCache<Any> {
 
     companion object
     {

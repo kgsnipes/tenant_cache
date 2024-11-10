@@ -21,6 +21,13 @@ dependencies {
 
     // https://mvnrepository.com/artifact/org.jetbrains.kotlin/kotlin-reflect
     implementation("org.jetbrains.kotlin:kotlin-reflect:2.0.20")
+
+    // https://mvnrepository.com/artifact/io.lettuce/lettuce-core
+    implementation("io.lettuce:lettuce-core:6.5.0.RELEASE")
+
+    // https://mvnrepository.com/artifact/org.apache.commons/commons-pool2
+    implementation("org.apache.commons:commons-pool2:2.12.0")
+
 }
 
 tasks.test {
