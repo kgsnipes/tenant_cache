@@ -360,7 +360,7 @@ class TenantCacheService(cacheService: Cache<Any>):TCache<Any> {
         }
     }
 
-    private fun getEntityName(value: Any): String? {
+    protected fun getEntityName(value: Any): String? {
         return getEntityName(value::class)
     }
 
