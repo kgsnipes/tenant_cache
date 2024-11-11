@@ -10,12 +10,12 @@ import org.junit.jupiter.api.Test
 class EHTCTest {
 
     var tc:TenantCacheService?=null
+
     @Test
     fun test01()
     {
         val tenant="tenant01"
         val tc=getEHTC()
-        tc.createTenantCache(tenant, mapOf(Pair("maxItems","1000"), Pair("ttlHours","24")))
         tc.put(tenant,EntityData().also {
             it.id="123456"
             it.name="name 123456"
@@ -37,7 +37,7 @@ class EHTCTest {
     {
         val tenant="tenant01"
         val tc=getEHTC()
-        tc.createTenantCache(tenant, mapOf(Pair("maxItems","100"), Pair("ttlHours","24")))
+
         tc.put(tenant,EntityData().also {
             it.id="123456"
             it.name="name 123456"
@@ -59,7 +59,6 @@ class EHTCTest {
     {
         val tenant="tenant01"
         val tc=getEHTC()
-        tc.createTenantCache(tenant, mapOf(Pair("maxItems","100"), Pair("ttlHours","24")))
         val itemsList= listOf(EntityData().also {
             it.id="123456"
             it.name="name 123456"
@@ -78,10 +77,13 @@ class EHTCTest {
 
     fun getEHTC(): TCache<Any>
     {
+        val tenant="tenant01"
         if(tc==null)
         {
             tc=TenantCacheService(EHCacheService())
         }
+
+        tc!!.createTenantCache(tenant, mapOf(Pair("maxItems","100"), Pair("ttlHours","24")))
         return tc!!
     }
 

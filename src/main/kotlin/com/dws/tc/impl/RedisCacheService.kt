@@ -1,22 +1,18 @@
 package com.dws.tc.impl
 
-import com.dws.tc.Cache
 import com.dws.tc.RedisCache
 import com.dws.tc.util.fromByteArray
 import com.dws.tc.util.toByteArray
 import io.lettuce.core.RedisClient
 import io.lettuce.core.RedisURI
-import io.lettuce.core.StatefulRedisConnectionImpl
 import io.lettuce.core.api.StatefulConnection
 import io.lettuce.core.api.StatefulRedisConnection
 import io.lettuce.core.cluster.RedisClusterClient
 import io.lettuce.core.cluster.api.StatefulRedisClusterConnection
 import io.lettuce.core.codec.ByteArrayCodec
-import io.lettuce.core.codec.RedisCodec
 import io.lettuce.core.support.ConnectionPoolSupport
 import org.apache.commons.pool2.impl.GenericObjectPool
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig
-import java.util.function.Supplier
 
 
 class RedisCacheService(private val config:Map<String,String>): RedisCache<Any> {
@@ -30,7 +26,7 @@ class RedisCacheService(private val config:Map<String,String>): RedisCache<Any> 
 
     init {
         assert(config["mode"]!=null)
-        assert(config["host"]!=null)
+        assert(config["z"]!=null)
         assert(config["port"]!=null)
         assert(config["ttlHours"]!=null)
         when(isClusterMode())
@@ -57,7 +53,7 @@ class RedisCacheService(private val config:Map<String,String>): RedisCache<Any> 
 
     override fun createCache(bucket: String, config: Map<String, String>) {
          connectionPool!!.borrowObject().let {
-            if(isClusterMode())
+            if(!isClusterMode())
             {
                 val connection=it as StatefulRedisConnection
                 connection.sync().set("${bucket}_cache".encodeToByteArray(), config.toByteArray())
@@ -82,7 +78,7 @@ class RedisCacheService(private val config:Map<String,String>): RedisCache<Any> 
 
     override fun get(bucket: String, key: String): Any? {
         return connectionPool!!.borrowObject().let {
-            if(isClusterMode())
+            if(!isClusterMode())
             {
                 val connection=it as StatefulRedisConnection
                 fromByteArray(connection.sync().get("${bucket}_${key}".encodeToByteArray()))
@@ -97,7 +93,7 @@ class RedisCacheService(private val config:Map<String,String>): RedisCache<Any> 
 
     override fun flushAll(bucket: String) {
         return connectionPool!!.borrowObject().let {
-            if(isClusterMode())
+            if(!isClusterMode())
             {
                 val connection=it as StatefulRedisConnection
                 connection.sync().del("${bucket}_cache".encodeToByteArray())
@@ -112,7 +108,7 @@ class RedisCacheService(private val config:Map<String,String>): RedisCache<Any> 
 
     override fun remove(bucket: String, key: String) {
         return connectionPool!!.borrowObject().let {
-            if(isClusterMode())
+            if(!isClusterMode())
             {
                 val connection=it as StatefulRedisConnection
                 connection.sync().del("${bucket}_${key}".encodeToByteArray())
@@ -127,7 +123,7 @@ class RedisCacheService(private val config:Map<String,String>): RedisCache<Any> 
 
     override fun hasKey(bucket: String, key: String): Boolean {
         return connectionPool!!.borrowObject().let {
-            if(isClusterMode())
+            if(!isClusterMode())
             {
                 val connection=it as StatefulRedisConnection
                 connection.sync().get("${bucket}_${key}".encodeToByteArray())!=null
@@ -142,7 +138,7 @@ class RedisCacheService(private val config:Map<String,String>): RedisCache<Any> 
 
     override fun put(bucket: String, key: String, value: Any) {
         return connectionPool!!.borrowObject().let {
-            if(isClusterMode())
+            if(!isClusterMode())
             {
                 val connection=it as StatefulRedisConnection
                 connection.sync().setex("${bucket}_${key}".encodeToByteArray(),config["ttlHours"]!!.toLong()*3600,value.toByteArray())
@@ -153,5 +149,9 @@ class RedisCacheService(private val config:Map<String,String>): RedisCache<Any> 
                 connection.sync().setex("${bucket}_${key}".encodeToByteArray(),config["ttlHours"]!!.toLong()*3600,value.toByteArray())
             }
         }
+    }
+
+    override fun hasTenant(bucket: String):Boolean {
+        return caches.containsKey(bucket)
     }
 }

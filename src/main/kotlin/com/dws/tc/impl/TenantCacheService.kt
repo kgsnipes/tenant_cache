@@ -42,6 +42,10 @@ class TenantCacheService(cacheService: Cache<Any>):TCache<Any> {
         getCacheService().removeCache(name)
     }
 
+    override fun hasTenant(name: String) {
+        TODO("Not yet implemented")
+    }
+
     override fun get(tenant: String, entity: String, id: String, isQuery: Boolean): Any? {
         return when(isQuery)
         {

@@ -1,6 +1,5 @@
 package com.dws.tc.impl
 
-import com.dws.tc.Cache
 import com.dws.tc.EHCache
 import org.ehcache.CacheManager
 import org.ehcache.Status
@@ -38,6 +37,10 @@ class EHCacheService: EHCache<Any> {
 
     override fun removeCache(bucket: String) {
         cacheMap.remove(bucket)
+    }
+
+    override fun hasTenant(bucket: String):Boolean {
+        return cacheMap.containsKey(bucket)
     }
 
     override fun getCache(bucket: String): org.ehcache.Cache<String, Any>? {

@@ -1,6 +1,9 @@
 package com.dws.tc.util
 
-import java.io.*
+import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
+import java.io.ObjectInputStream
+import java.io.ObjectOutputStream
 
 fun Any.toByteArray(): ByteArray {
     val byteArrayOutputStream = ByteArrayOutputStream()
