@@ -3,6 +3,7 @@ package com.dws.tc.impl
 import com.dws.tc.Cache
 import com.dws.tc.EHCache
 import org.ehcache.CacheManager
+import org.ehcache.Status
 import org.ehcache.config.builders.CacheConfigurationBuilder
 import org.ehcache.config.builders.CacheManagerBuilder
 import org.ehcache.config.builders.ExpiryPolicyBuilder
@@ -21,7 +22,9 @@ class EHCacheService: EHCache<Any> {
     }
 
     init {
-        manager.init()
+        if(manager.status!=Status.AVAILABLE) {
+            manager.init()
+        }
     }
 
     override fun createCache(bucket: String, config: Map<String, String>) {

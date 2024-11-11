@@ -2,12 +2,14 @@ package com.dws.tc
 
 import com.dws.tc.annotation.CacheEntity
 import com.dws.tc.annotation.CacheId
+import com.dws.tc.impl.EHCacheService
 import com.dws.tc.impl.TenantCacheService
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
 class EHTCTest {
 
+    var tc:TenantCacheService?=null
     @Test
     fun test01()
     {
@@ -76,7 +78,11 @@ class EHTCTest {
 
     fun getEHTC(): TCache<Any>
     {
-        return TenantCacheService()
+        if(tc==null)
+        {
+            tc=TenantCacheService(EHCacheService())
+        }
+        return tc!!
     }
 
     @CacheEntity
