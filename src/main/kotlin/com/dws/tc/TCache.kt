@@ -5,7 +5,7 @@ interface TCache<T> {
     //tenant operations
     fun createTenantCache(name:String,config:Map<String,String>)
     fun removeTenantCache(name:String)
-    fun hasTenant(name:String)
+    fun hasTenant(name:String):Boolean
 
     //read operations
     fun get(tenant:String,entity:String,id:String,isQuery: Boolean):T?

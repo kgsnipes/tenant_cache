@@ -18,7 +18,7 @@ import org.apache.commons.pool2.impl.GenericObjectPoolConfig
 class RedisCacheService(private val config:Map<String,String>): RedisCache<Any> {
     companion object
     {
-        private val caches= mutableMapOf<String,Map<String,String>>()
+
         private var redisClient:RedisClient?=null
         private var redisClusterClient:RedisClusterClient?=null
         private var connectionPool:GenericObjectPool<StatefulConnection<ByteArray, ByteArray>>?=null
@@ -63,17 +63,38 @@ class RedisCacheService(private val config:Map<String,String>): RedisCache<Any> 
                 val connection=it as StatefulRedisClusterConnection
                 connection.sync().set("${bucket}_cache".encodeToByteArray(), config.toByteArray())
             }
-             caches.put(bucket,config)
         }
 
     }
 
     override fun removeCache(bucket: String) {
-        caches.remove(bucket)
+        return connectionPool!!.borrowObject().let {
+            if(!isClusterMode())
+            {
+                val connection=it as StatefulRedisConnection
+                connection.sync().del("${bucket}_cache".encodeToByteArray())
+            }
+            else
+            {
+                val connection=it as StatefulRedisClusterConnection
+                connection.sync().del("${bucket}_cache".encodeToByteArray())
+            }
+        }
     }
 
     override fun getCache(bucket: String): Map<String,String>? {
-        return caches.get(bucket)
+        return connectionPool!!.borrowObject().let {
+            if(!isClusterMode())
+            {
+                val connection=it as StatefulRedisConnection
+                fromByteArray(connection.sync().get("${bucket}_cache".encodeToByteArray())) as Map<String, String>?
+            }
+            else
+            {
+                val connection=it as StatefulRedisClusterConnection
+                fromByteArray(connection.sync().get("${bucket}_cache".encodeToByteArray())) as Map<String, String>?
+            }
+        }
     }
 
     override fun get(bucket: String, key: String): Any? {
@@ -152,6 +173,17 @@ class RedisCacheService(private val config:Map<String,String>): RedisCache<Any> 
     }
 
     override fun hasTenant(bucket: String):Boolean {
-        return caches.containsKey(bucket)
+        return connectionPool!!.borrowObject().let {
+            if(!isClusterMode())
+            {
+                val connection=it as StatefulRedisConnection
+                connection.sync().get("${bucket}_cache".encodeToByteArray())!=null
+            }
+            else
+            {
+                val connection=it as StatefulRedisClusterConnection
+                connection.sync().del("${bucket}_cache".encodeToByteArray())!=null
+            }
+        }
     }
 }

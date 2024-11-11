@@ -16,7 +16,9 @@ fun Any.toByteArray(): ByteArray {
     return result
 }
 @Suppress("UNCHECKED_CAST")
-fun fromByteArray(byteArray: ByteArray): Any {
+fun fromByteArray(byteArray: ByteArray?): Any? {
+    if(byteArray==null)
+        return null
     val byteArrayInputStream = ByteArrayInputStream(byteArray)
     val objectInput= ObjectInputStream(byteArrayInputStream)
     val result = objectInput.readObject()
