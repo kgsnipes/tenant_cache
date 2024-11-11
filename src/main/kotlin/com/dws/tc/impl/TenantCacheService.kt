@@ -16,17 +16,17 @@ import kotlin.reflect.KMutableProperty
 import kotlin.reflect.KProperty
 import kotlin.reflect.full.hasAnnotation
 
-class EHTenantCacheService(cacheService: Cache<Any>): AbstractCacheService(), TCache<Any> {
+class TenantCacheService(cacheService: Cache<Any>):TCache<Any> {
 
     companion object
     {
         private var cacheService:Cache<Any>?= null
-        protected val addEntitiesfromQueries= ConcurrentSkipListSet<Pair<String,Any>>()
-        protected val entitiesForQueryUpdate= ConcurrentSkipListSet<Triple<String,String,String>>() //tenant,(entitytype,entityid)
-        protected val removeEntitiesFromQueries= ConcurrentSkipListSet<Triple<String,String,String>>() //tenant,(entitytype,entityid)
-        protected var maintenanceThread:Thread?=null
-        
-        private val log=LoggerFactory.getLogger(EHTenantCacheService::class.java)
+        private val addEntitiesFromQueries= ConcurrentSkipListSet<Pair<String,Any>>()
+        private val entitiesForQueryUpdate= ConcurrentSkipListSet<Triple<String,String,String>>() //tenant,(entitytype,entityid)
+        private val removeEntitiesFromQueries= ConcurrentSkipListSet<Triple<String,String,String>>() //tenant,(entitytype,entityid)
+        private var maintenanceThread:Thread?=null
+
+        private val log=LoggerFactory.getLogger(TenantCacheService::class.java)
     }
 
     init {
@@ -157,7 +157,7 @@ class EHTenantCacheService(cacheService: Cache<Any>): AbstractCacheService(), TC
 
     protected fun addEntitiesfromQueriesToCache(pair:Pair<String,Any>)
     {
-        addEntitiesfromQueries.add(pair)
+        addEntitiesFromQueries.add(pair)
     }
 
     protected fun setCacheService(service: Cache<Any>)
@@ -219,9 +219,9 @@ class EHTenantCacheService(cacheService: Cache<Any>): AbstractCacheService(), TC
 
     protected fun performCacheEntriesFromQueryResult()
     {
-        if(addEntitiesfromQueries.isNotEmpty())
+        if(addEntitiesFromQueries.isNotEmpty())
         {
-            addEntitiesfromQueries.forEach { e->
+            addEntitiesFromQueries.forEach { e->
                 _put(e.first,e.second,false,false)
             }
         }
