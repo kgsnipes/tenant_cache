@@ -82,8 +82,11 @@ class EHTCTest {
         {
             tc=TenantCacheService(EHCacheService())
         }
+        if(!tc!!.hasTenant(tenant))
+        {
+            tc!!.createTenantCache(tenant, mapOf(Pair("maxItems","100"), Pair("ttlHours","24")))
+        }
 
-        tc!!.createTenantCache(tenant, mapOf(Pair("maxItems","100"), Pair("ttlHours","24")))
         return tc!!
     }
 
