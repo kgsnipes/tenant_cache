@@ -26,7 +26,7 @@ class RedisCacheService(private val config:Map<String,String>): RedisCache<Any> 
 
     init {
         assert(config["mode"]!=null)
-        assert(config["z"]!=null)
+        assert(config["host"]!=null)
         assert(config["port"]!=null)
         assert(config["ttlHours"]!=null)
         when(isClusterMode())
