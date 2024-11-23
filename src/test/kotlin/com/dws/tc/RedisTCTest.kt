@@ -7,6 +7,7 @@ import com.dws.tc.impl.RedisCacheService
 import com.dws.tc.impl.TenantCacheService
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
+import java.io.Serializable
 
 class RedisTCTest {
 
@@ -92,7 +93,7 @@ class RedisTCTest {
     }
 
     @CacheEntity
-    class EntityData(){
+    class EntityData():Serializable{
         @CacheId
         var id:String?=null
         var name:String?=null

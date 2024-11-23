@@ -33,11 +33,11 @@ class RedisCacheService(private val config:Map<String,String>): RedisCache<Any> 
         {
             true-> {
                 redisClusterClient = RedisClusterClient.create(RedisURI.create(config["host"], config["port"]!!.toInt()))
-                connectionPool= ConnectionPoolSupport.createGenericObjectPool({ redisClusterClient!!.connect(
-                    ByteArrayCodec()
-                ) },
-                    GenericObjectPoolConfig()
-                )
+//                connectionPool= ConnectionPoolSupport.createGenericObjectPool({ redisClusterClient!!.connect(
+//                    ByteArrayCodec()
+//                ) },
+//                    GenericObjectPoolConfig()
+//                )
             }
             false-> {
                 redisClient = RedisClient.create(RedisURI.create(config["host"], config["port"]!!.toInt()))
@@ -51,49 +51,47 @@ class RedisCacheService(private val config:Map<String,String>): RedisCache<Any> 
         return config["mode"]=="cluster"
     }
 
-    override fun createCache(bucket: String, config: Map<String, String>) {
-         connectionPool!!.borrowObject().let {
-            if(!isClusterMode())
-            {
-                val connection=it as StatefulRedisConnection
-                connection.sync().set("${bucket}_cache".encodeToByteArray(), config.toByteArray())
-            }
-            else
-            {
-                val connection=it as StatefulRedisClusterConnection
-                connection.sync().set("${bucket}_cache".encodeToByteArray(), config.toByteArray())
-            }
-        }
+    private fun getStatefulRedisConnection(): StatefulRedisConnection<ByteArray, ByteArray>?
+    {
+        return redisClient!!.connect(ByteArrayCodec())
+    }
 
+    private fun getStatefulRedisClusterConnection(): StatefulRedisClusterConnection<ByteArray, ByteArray>?
+    {
+        return redisClusterClient!!.connect(ByteArrayCodec())
+    }
+
+    override fun createCache(bucket: String, config: Map<String, String>) {
+        if(!isClusterMode())
+        {
+            getStatefulRedisConnection()!!.sync().set("${bucket}_cache".encodeToByteArray(), config.toByteArray())
+        }
+        else
+        {
+            getStatefulRedisClusterConnection()!!.sync().set("${bucket}_cache".encodeToByteArray(), config.toByteArray())
+        }
     }
 
     override fun removeCache(bucket: String) {
-        return connectionPool!!.borrowObject().let {
-            if(!isClusterMode())
-            {
-                val connection=it as StatefulRedisConnection
-                connection.sync().del("${bucket}_cache".encodeToByteArray())
-            }
-            else
-            {
-                val connection=it as StatefulRedisClusterConnection
-                connection.sync().del("${bucket}_cache".encodeToByteArray())
-            }
+        if(!isClusterMode())
+        {
+            getStatefulRedisConnection()!!.sync().del("${bucket}_cache".encodeToByteArray())
         }
+        else
+        {
+            getStatefulRedisClusterConnection()!!.sync().del("${bucket}_cache".encodeToByteArray())
+        }
+
     }
 
     override fun getCache(bucket: String): Map<String,String>? {
-        return connectionPool!!.borrowObject().let {
-            if(!isClusterMode())
-            {
-                val connection=it as StatefulRedisConnection
-                fromByteArray(connection.sync().get("${bucket}_cache".encodeToByteArray())) as Map<String, String>?
-            }
-            else
-            {
-                val connection=it as StatefulRedisClusterConnection
-                fromByteArray(connection.sync().get("${bucket}_cache".encodeToByteArray())) as Map<String, String>?
-            }
+        return if(!isClusterMode())
+        {
+            fromByteArray(getStatefulRedisConnection()!!.sync().get("${bucket}_cache".encodeToByteArray())) as Map<String, String>?
+        }
+        else
+        {
+            fromByteArray(getStatefulRedisClusterConnection()!!.sync().get("${bucket}_cache".encodeToByteArray())) as Map<String, String>?
         }
     }
 

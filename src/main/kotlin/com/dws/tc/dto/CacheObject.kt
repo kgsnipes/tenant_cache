@@ -1,3 +1,5 @@
 package com.dws.tc.dto
 
-data class CacheObject(val id:String,val obj:Any)
+import java.io.Serializable
+
+class CacheObject(val id:String,val obj:Any):Serializable
