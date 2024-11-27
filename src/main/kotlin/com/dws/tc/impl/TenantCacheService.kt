@@ -137,8 +137,7 @@ class TenantCacheService(cacheService: Cache<Any>):TCache<Any> {
             val id=getIdForObject(value)
             if(entityName!=null && id!=null)
             {
-                 hasKey(tenant,entityName,id,isQuery)
-
+                hasKey(tenant,entityName,id,isQuery)
             }
             else
             {
@@ -149,7 +148,6 @@ class TenantCacheService(cacheService: Cache<Any>):TCache<Any> {
         {
             false
         }
-
     }
 
     override fun putQueryResult(tenant: String,queryId:String,value: Any,listAttribute:String,updateAsync:Boolean) {
