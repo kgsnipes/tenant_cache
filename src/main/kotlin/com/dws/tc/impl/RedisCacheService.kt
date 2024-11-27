@@ -96,92 +96,68 @@ class RedisCacheService(private val config:Map<String,String>): RedisCache<Any> 
     }
 
     override fun get(bucket: String, key: String): Any? {
-        return connectionPool!!.borrowObject().let {
-            if(!isClusterMode())
+        return if(!isClusterMode())
             {
-                val connection=it as StatefulRedisConnection
-                fromByteArray(connection.sync().get("${bucket}_${key}".encodeToByteArray()))
+                fromByteArray(getStatefulRedisConnection()!!.sync().get("${bucket}_${key}".encodeToByteArray()))
             }
             else
             {
-                val connection=it as StatefulRedisClusterConnection
-                fromByteArray(connection.sync().get("${bucket}_${key}".encodeToByteArray()))
+                fromByteArray(getStatefulRedisClusterConnection()!!.sync().get("${bucket}_${key}".encodeToByteArray()))
             }
-        }
     }
 
     override fun flushAll(bucket: String) {
-        return connectionPool!!.borrowObject().let {
-            if(!isClusterMode())
-            {
-                val connection=it as StatefulRedisConnection
-                connection.sync().del("${bucket}_cache".encodeToByteArray())
-            }
-            else
-            {
-                val connection=it as StatefulRedisClusterConnection
-                connection.sync().del("${bucket}_cache".encodeToByteArray())
-            }
+        if(!isClusterMode())
+        {
+            getStatefulRedisConnection()!!.sync().del("${bucket}_cache".encodeToByteArray())
+        }
+        else
+        {
+            getStatefulRedisClusterConnection()!!.sync().del("${bucket}_cache".encodeToByteArray())
         }
     }
 
     override fun remove(bucket: String, key: String) {
-        return connectionPool!!.borrowObject().let {
-            if(!isClusterMode())
-            {
-                val connection=it as StatefulRedisConnection
-                connection.sync().del("${bucket}_${key}".encodeToByteArray())
-            }
-            else
-            {
-                val connection=it as StatefulRedisClusterConnection
-                connection.sync().del("${bucket}_${key}".encodeToByteArray())
-            }
+        if(!isClusterMode())
+        {
+            getStatefulRedisConnection()!!.sync().del("${bucket}_${key}".encodeToByteArray())
+        }
+        else
+        {
+            getStatefulRedisClusterConnection()!!.sync().del("${bucket}_${key}".encodeToByteArray())
         }
     }
 
     override fun hasKey(bucket: String, key: String): Boolean {
-        return connectionPool!!.borrowObject().let {
-            if(!isClusterMode())
-            {
-                val connection=it as StatefulRedisConnection
-                connection.sync().get("${bucket}_${key}".encodeToByteArray())!=null
-            }
-            else
-            {
-                val connection=it as StatefulRedisClusterConnection
-                connection.sync().del("${bucket}_${key}".encodeToByteArray())!=null
-            }
+        return if(!isClusterMode())
+        {
+            getStatefulRedisConnection()!!.sync().get("${bucket}_${key}".encodeToByteArray())!=null
+        }
+        else
+        {
+            getStatefulRedisClusterConnection()!!.sync().del("${bucket}_${key}".encodeToByteArray())!=null
         }
     }
 
     override fun put(bucket: String, key: String, value: Any) {
-        return connectionPool!!.borrowObject().let {
             if(!isClusterMode())
             {
-                val connection=it as StatefulRedisConnection
-                connection.sync().setex("${bucket}_${key}".encodeToByteArray(),config["ttlHours"]!!.toLong()*3600,value.toByteArray())
+                getStatefulRedisConnection()!!.sync().setex("${bucket}_${key}".encodeToByteArray(),config["ttlHours"]!!.toLong()*3600,value.toByteArray())
             }
             else
             {
-                val connection=it as StatefulRedisClusterConnection
-                connection.sync().setex("${bucket}_${key}".encodeToByteArray(),config["ttlHours"]!!.toLong()*3600,value.toByteArray())
+                getStatefulRedisClusterConnection()!!.sync().setex("${bucket}_${key}".encodeToByteArray(),config["ttlHours"]!!.toLong()*3600,value.toByteArray())
             }
-        }
     }
 
     override fun hasTenant(bucket: String):Boolean {
-        return connectionPool!!.borrowObject().let {
-            if(!isClusterMode())
-            {
-                val connection=it as StatefulRedisConnection
-                connection.sync().get("${bucket}_cache".encodeToByteArray())!=null
-            }
-            else
-            {
-                val connection=it as StatefulRedisClusterConnection
-                connection.sync().del("${bucket}_cache".encodeToByteArray())!=null
-            }
+    return if(!isClusterMode())
+        {
+            getStatefulRedisConnection()!!.sync().get("${bucket}_cache".encodeToByteArray())!=null
+        }
+        else
+        {
+            getStatefulRedisClusterConnection()!!.sync().del("${bucket}_cache".encodeToByteArray())!=null
         }
     }
 }
