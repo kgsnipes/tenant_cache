@@ -130,6 +130,28 @@ class TenantCacheService(cacheService: Cache<Any>):TCache<Any> {
         }
     }
 
+    override fun hasKey(tenant: String, value: Any, isQuery: Boolean): Boolean {
+        return if(cacheAnnotationsAvailable(value))
+        {
+            val entityName=getEntityName(value)
+            val id=getIdForObject(value)
+            if(entityName!=null && id!=null)
+            {
+                 hasKey(tenant,entityName,id,isQuery)
+
+            }
+            else
+            {
+                false
+            }
+        }
+        else
+        {
+            false
+        }
+
+    }
+
     override fun putQueryResult(tenant: String,queryId:String,value: Any,listAttribute:String,updateAsync:Boolean) {
         getCacheService().put(tenant,"${tenant}_query_${queryId}",CacheQueryObject(queryId,value,listAttribute))
         val lAttribute=value::class.members.firstOrNull { e->e.name==listAttribute }

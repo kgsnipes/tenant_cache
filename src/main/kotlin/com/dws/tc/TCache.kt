@@ -20,5 +20,6 @@ interface TCache<T> {
     fun remove(tenant:String,entity:String,id:String,isQuery:Boolean,updateAsync:Boolean)
 
     fun hasKey(tenant:String,entity:String,id:String,isQuery:Boolean):Boolean
+    fun hasKey(tenant:String,value:T, isQuery: Boolean):Boolean
 
 }
