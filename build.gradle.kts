@@ -3,7 +3,7 @@ plugins {
 }
 
 group = "com.dws"
-version = "1.0-SNAPSHOT"
+version = "1.0"
 
 repositories {
     mavenCentral()
@@ -35,4 +35,16 @@ tasks.test {
 }
 kotlin {
     jvmToolchain(17)
+}
+
+tasks.create("fatJar", Jar::class) {
+    group = "com.dsw" // OR, for example, "build"
+    description = "tenant_cache"
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    val dependencies = configurations
+        .runtimeClasspath
+        .get()
+        .map(::zipTree)
+    from(dependencies)
+    with(tasks.jar.get())
 }
