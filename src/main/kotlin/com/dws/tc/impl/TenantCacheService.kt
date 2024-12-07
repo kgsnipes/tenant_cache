@@ -22,8 +22,8 @@ class TenantCacheService(cacheService: Cache<Any>):TCache<Any> {
     {
         private var cacheService:Cache<Any>?= null
         private val addEntitiesFromQueries= ConcurrentSkipListSet<Pair<String,Any>>()
-        private val entitiesForQueryUpdate= ConcurrentSkipListSet<Triple<String,String,String>>() //tenant,(entitytype,entityid)
-        private val removeEntitiesFromQueries= ConcurrentSkipListSet<Triple<String,String,String>>() //tenant,(entitytype,entityid)
+        private val entitiesForQueryUpdate= ConcurrentSkipListSet<com.dws.tc.dto.Triple>() //tenant,(entitytype,entityid)
+        private val removeEntitiesFromQueries= ConcurrentSkipListSet<com.dws.tc.dto.Triple>() //tenant,(entitytype,entityid)
         private var maintenanceThread:Thread?=null
 
         private val log=LoggerFactory.getLogger(TenantCacheService::class.java)
@@ -84,7 +84,7 @@ class TenantCacheService(cacheService: Cache<Any>):TCache<Any> {
         getCacheService().put(tenant,"${entity}_${id}",CacheObject(id,value))
         if(updateAsync) {
            // entitiesForQueryUpdate.add(Triple(tenant,entity, id))
-            addEntitiesForQueryUpdate(Triple(tenant,entity, id))
+            addEntitiesForQueryUpdate(com.dws.tc.dto.Triple(tenant,entity, id))
         }
         else
         {
@@ -105,7 +105,7 @@ class TenantCacheService(cacheService: Cache<Any>):TCache<Any> {
                 getCacheService().remove(tenant,"${entity}_${id}")
 
                 if(updateAsync) {
-                    removeEntitiesFromQueriesOnRemoveAction(Triple(tenant,entity, id))
+                    removeEntitiesFromQueriesOnRemoveAction(com.dws.tc.dto.Triple(tenant,entity, id))
                 }
                 else
                 {
@@ -168,12 +168,12 @@ class TenantCacheService(cacheService: Cache<Any>):TCache<Any> {
         initiateMaintenanceThread()
     }
 
-    protected fun removeEntitiesFromQueriesOnRemoveAction(triple:Triple<String,String,String>)
+    protected fun removeEntitiesFromQueriesOnRemoveAction(triple:com.dws.tc.dto.Triple)
     {
         removeEntitiesFromQueries.add(triple)
     }
 
-    protected fun addEntitiesForQueryUpdate(triple:Triple<String,String,String>)
+    protected fun addEntitiesForQueryUpdate(triple:com.dws.tc.dto.Triple)
     {
         entitiesForQueryUpdate.add(triple)
     }
@@ -277,7 +277,7 @@ class TenantCacheService(cacheService: Cache<Any>):TCache<Any> {
         }
     }
 
-    protected fun updateQueryResultWithUpdatedEntity(t:Triple<String,String,String>)
+    protected fun updateQueryResultWithUpdatedEntity(t:com.dws.tc.dto.Triple)
     {
         //fetch the actual entity
         val wrappedEntity= getCacheService().get(t.first,"${t.second}_${t.third}")
@@ -355,11 +355,11 @@ class TenantCacheService(cacheService: Cache<Any>):TCache<Any> {
                 if(performAsyncUpdates)
                 {
                     if(updateAsync) {
-                        entitiesForQueryUpdate.add(Triple(tenant,entityName, id))
+                        entitiesForQueryUpdate.add(com.dws.tc.dto.Triple(tenant,entityName, id))
                     }
                     else
                     {
-                        updateQueryResultWithUpdatedEntity(Triple(tenant,entityName, id))
+                        updateQueryResultWithUpdatedEntity(com.dws.tc.dto.Triple(tenant,entityName, id))
                     }
                 }
 
