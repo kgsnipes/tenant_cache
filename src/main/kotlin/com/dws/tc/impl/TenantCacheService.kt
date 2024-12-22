@@ -89,7 +89,9 @@ class TenantCacheService(cacheService: Cache<Any>):TCache<Any> {
         }
         else
         {
-            TODO()
+            //iterate over each element
+            updateQueryResultWithUpdatedEntity(com.dws.tc.dto.Triple(tenant,entity, id))
+
         }
         initiateMaintenanceThread()
     }

@@ -1,5 +1,6 @@
 package com.dws.tc.impl
 
+import com.dws.tc.Cache
 import com.dws.tc.RedisCache
 import com.dws.tc.util.fromByteArray
 import com.dws.tc.util.toByteArray
@@ -16,7 +17,7 @@ import org.apache.commons.pool2.impl.GenericObjectPoolConfig
 import java.util.Properties
 
 
-class RedisCacheService(private val config:Properties): RedisCache<Any> {
+class RedisCacheService(private val config:Properties): Cache<Any> {
     companion object
     {
 
@@ -85,16 +86,16 @@ class RedisCacheService(private val config:Properties): RedisCache<Any> {
 
     }
 
-    override fun getCache(bucket: String): Map<String,String>? {
-        return if(!isClusterMode())
-        {
-            fromByteArray(getStatefulRedisConnection()!!.sync().get("${bucket}_cache".encodeToByteArray())) as Map<String, String>?
-        }
-        else
-        {
-            fromByteArray(getStatefulRedisClusterConnection()!!.sync().get("${bucket}_cache".encodeToByteArray())) as Map<String, String>?
-        }
-    }
+//    override fun getCache(bucket: String): Map<String,String>? {
+//        return if(!isClusterMode())
+//        {
+//            fromByteArray(getStatefulRedisConnection()!!.sync().get("${bucket}_cache".encodeToByteArray())) as Map<String, String>?
+//        }
+//        else
+//        {
+//            fromByteArray(getStatefulRedisClusterConnection()!!.sync().get("${bucket}_cache".encodeToByteArray())) as Map<String, String>?
+//        }
+//    }
 
     override fun get(bucket: String, key: String): Any? {
         return if(!isClusterMode())

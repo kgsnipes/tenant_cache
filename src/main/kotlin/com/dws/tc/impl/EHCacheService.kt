@@ -1,5 +1,6 @@
 package com.dws.tc.impl
 
+import com.dws.tc.Cache
 import com.dws.tc.EHCache
 import org.ehcache.CacheManager
 import org.ehcache.Status
@@ -13,7 +14,7 @@ import java.time.temporal.ChronoUnit
 import java.util.*
 
 
-class EHCacheService: EHCache<Any> {
+class EHCacheService: Cache<Any> {
 
     companion object
     {
@@ -44,10 +45,6 @@ class EHCacheService: EHCache<Any> {
         return cacheMap.containsKey(bucket)
     }
 
-    override fun getCache(bucket: String): org.ehcache.Cache<String, Any>? {
-        return cacheMap[bucket]
-    }
-
     override fun get(bucket:String,key: String): Any? {
         return getCache(bucket)!!.get(key)
     }
@@ -66,5 +63,9 @@ class EHCacheService: EHCache<Any> {
 
     override fun put(bucket:String,key: String, value: Any) {
         getCache(bucket)!!.put(key, value)
+    }
+
+    private fun getCache(bucket: String): org.ehcache.Cache<String, Any>? {
+        return cacheMap[bucket]
     }
 }

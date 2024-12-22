@@ -86,7 +86,7 @@ class RedisTCTest {
         }
         if(!tc!!.hasTenant(tenant))
         {
-            tc!!.createTenantCache(tenant, mapOf(Pair("redis.maxItems","100"), Pair("redis.ttlminutes","3600")))
+            tc!!.createTenantCache(tenant, mapOf(Pair("redis.maxItems","100"), Pair("redis.ttlminutes","3600")).toProperties())
         }
 
         return tc!!

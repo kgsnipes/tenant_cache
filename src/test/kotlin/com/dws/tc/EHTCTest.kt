@@ -84,7 +84,7 @@ class EHTCTest {
         }
         if(!tc!!.hasTenant(tenant))
         {
-            tc!!.createTenantCache(tenant, mapOf(Pair("ehcache.maxentries","100"), Pair("ehcache.ttlminutes","24")))
+            tc!!.createTenantCache(tenant, mapOf(Pair("ehcache.maxentries","100"), Pair("ehcache.ttlminutes","24")).toProperties())
         }
 
         return tc!!
