@@ -13,9 +13,10 @@ import io.lettuce.core.codec.ByteArrayCodec
 import io.lettuce.core.support.ConnectionPoolSupport
 import org.apache.commons.pool2.impl.GenericObjectPool
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig
+import java.util.Properties
 
 
-class RedisCacheService(private val config:Map<String,String>): RedisCache<Any> {
+class RedisCacheService(private val config:Properties): RedisCache<Any> {
     companion object
     {
 
@@ -25,14 +26,14 @@ class RedisCacheService(private val config:Map<String,String>): RedisCache<Any> 
     }
 
     init {
-        assert(config["mode"]!=null)
-        assert(config["host"]!=null)
-        assert(config["port"]!=null)
-        assert(config["ttlHours"]!=null)
+        assert(config.getProperty("redis.mode")!=null)
+        assert(config.getProperty("redis.host")!=null)
+        assert(config.getProperty("redis.port")!=null)
+        assert(config.getProperty("redis.ttlminutes")!=null)
         when(isClusterMode())
         {
             true-> {
-                redisClusterClient = RedisClusterClient.create(RedisURI.create(config["host"], config["port"]!!.toInt()))
+                redisClusterClient = RedisClusterClient.create(RedisURI.create(config.getProperty("redis.host"), config.getProperty("redis.port")!!.toInt()))
 //                connectionPool= ConnectionPoolSupport.createGenericObjectPool({ redisClusterClient!!.connect(
 //                    ByteArrayCodec()
 //                ) },
@@ -40,7 +41,7 @@ class RedisCacheService(private val config:Map<String,String>): RedisCache<Any> 
 //                )
             }
             false-> {
-                redisClient = RedisClient.create(RedisURI.create(config["host"], config["port"]!!.toInt()))
+                redisClient = RedisClient.create(RedisURI.create(config.getProperty("redis.host"), config.getProperty("redis.port")!!.toInt()))
                 connectionPool= ConnectionPoolSupport.createGenericObjectPool({ redisClient!!.connect(ByteArrayCodec()) },GenericObjectPoolConfig())
             }
         }
@@ -61,7 +62,7 @@ class RedisCacheService(private val config:Map<String,String>): RedisCache<Any> 
         return redisClusterClient!!.connect(ByteArrayCodec())
     }
 
-    override fun createCache(bucket: String, config: Map<String, String>) {
+    override fun createCache(bucket: String, config: Properties) {
         if(!isClusterMode())
         {
             getStatefulRedisConnection()!!.sync().set("${bucket}_cache".encodeToByteArray(), config.toByteArray())
@@ -142,11 +143,11 @@ class RedisCacheService(private val config:Map<String,String>): RedisCache<Any> 
     override fun put(bucket: String, key: String, value: Any) {
             if(!isClusterMode())
             {
-                getStatefulRedisConnection()!!.sync().setex("${bucket}_${key}".encodeToByteArray(),config["ttlHours"]!!.toLong()*3600,value.toByteArray())
+                getStatefulRedisConnection()!!.sync().setex("${bucket}_${key}".encodeToByteArray(),config.getProperty("redis.ttlminutes")!!.toLong(),value.toByteArray())
             }
             else
             {
-                getStatefulRedisClusterConnection()!!.sync().setex("${bucket}_${key}".encodeToByteArray(),config["ttlHours"]!!.toLong()*3600,value.toByteArray())
+                getStatefulRedisClusterConnection()!!.sync().setex("${bucket}_${key}".encodeToByteArray(),config.getProperty("redis.ttlminutes")!!.toLong(),value.toByteArray())
             }
     }
 

@@ -10,6 +10,7 @@ import org.ehcache.config.builders.ResourcePoolsBuilder
 import org.ehcache.config.units.EntryUnit
 import java.time.Duration
 import java.time.temporal.ChronoUnit
+import java.util.*
 
 
 class EHCacheService: EHCache<Any> {
@@ -26,12 +27,12 @@ class EHCacheService: EHCache<Any> {
         }
     }
 
-    override fun createCache(bucket: String, config: Map<String, String>) {
+    override fun createCache(bucket: String, config: Properties) {
         val cache= manager.createCache(bucket,
             CacheConfigurationBuilder.newCacheConfigurationBuilder(
                 String::class.java,Any::class.java,
-                ResourcePoolsBuilder.newResourcePoolsBuilder().heap(config["maxItems"]!!.toLong(), EntryUnit.ENTRIES)).withExpiry(ExpiryPolicyBuilder.timeToLiveExpiration(
-                Duration.of(config["ttlHours"]!!.toLong(),ChronoUnit.HOURS))).build())
+                ResourcePoolsBuilder.newResourcePoolsBuilder().heap(config.getProperty("ehcache.maxentries")!!.toLong(), EntryUnit.ENTRIES)).withExpiry(ExpiryPolicyBuilder.timeToLiveExpiration(
+                Duration.of(config.getProperty("ehcache.ttlminutes")!!.toLong(),ChronoUnit.MINUTES))).build())
         cacheMap[bucket] = cache
     }
 

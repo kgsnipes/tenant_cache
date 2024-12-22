@@ -1,9 +1,11 @@
 package com.dws.tc
 
+import java.util.Properties
+
 interface TCache<T> {
 
     //tenant operations
-    fun createTenantCache(name:String,config:Map<String,String>)
+    fun createTenantCache(name:String,config:Properties)
     fun removeTenantCache(name:String)
     fun hasTenant(name:String):Boolean
 

@@ -82,11 +82,11 @@ class RedisTCTest {
         val tenant="tenant01"
         if(tc==null)
         {
-            tc=TenantCacheService(RedisCacheService(mapOf(Pair("mode","standalone"), Pair("host","localhost"),Pair("port","6379"),Pair("ttlHours","24"))))
+            tc=TenantCacheService(RedisCacheService(mapOf(Pair("redis.mode","standalone"), Pair("redis.host","localhost"),Pair("redis.port","6379"),Pair("ttlminutes","3600")).toProperties()))
         }
         if(!tc!!.hasTenant(tenant))
         {
-            tc!!.createTenantCache(tenant, mapOf(Pair("maxItems","100"), Pair("ttlHours","24")))
+            tc!!.createTenantCache(tenant, mapOf(Pair("redis.maxItems","100"), Pair("redis.ttlminutes","3600")))
         }
 
         return tc!!

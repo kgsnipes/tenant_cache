@@ -8,6 +8,7 @@ import com.dws.tc.dto.CacheObject
 import com.dws.tc.dto.CacheQueryObject
 import org.slf4j.LoggerFactory
 import java.lang.Thread.sleep
+import java.util.Properties
 import java.util.concurrent.ConcurrentSkipListSet
 import kotlin.concurrent.thread
 import kotlin.random.Random
@@ -34,7 +35,7 @@ class TenantCacheService(cacheService: Cache<Any>):TCache<Any> {
         setCacheService(cacheService)
     }
 
-    override fun createTenantCache(name: String, config: Map<String, String>) {
+    override fun createTenantCache(name: String, config: Properties) {
         getCacheService().createCache(name,config)
     }
 

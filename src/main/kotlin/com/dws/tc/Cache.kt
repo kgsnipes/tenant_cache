@@ -1,7 +1,9 @@
 package com.dws.tc
 
+import java.util.Properties
+
 interface Cache<T> {
-    fun createCache(bucket:String,config:Map<String,String>)
+    fun createCache(bucket:String,config:Properties)
     fun removeCache(bucket:String)
     fun hasTenant(bucket:String):Boolean
     fun get(bucket:String,key:String):T?
